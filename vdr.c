@@ -880,23 +880,27 @@ int main(int argc, char *argv[])
                             if (d->MaySwitchTransponder()) {
                                DeviceAvailable = true; // avoids using the actual device below
                                if (timeout)
-                                  Device = d; // only check other devices if they have been left alone for a while
+                                  // Device = d; // only check other devices if they have been left alone for a while
+                                  if( d->GetMaxBadPriority(Timer->Channel()) <= 0) Device = d;  // LNB Sharing
                                }
                             else if (timeout && !Device && InVpsMargin && !d->Receiving() && d->ProvidesTransponderExclusively(Timer->Channel()))
-                               Device = d; // use this one only if no other with less impact can be found
-                            }
+                               // Device = d; // use this one only if no other with less impact can be found
+                               if( d->GetMaxBadPriority(Timer->Channel()) <= 0) Device = d;  // LNB Sharing
+                         }
                          }
                      if (!Device && InVpsMargin && !DeviceAvailable) {
                         cDevice *d = cDevice::ActualDevice();
                         if (!d->Receiving() && d->ProvidesTransponder(Timer->Channel()) && Now - DeviceUsed[d->DeviceNumber()] > TIMERDEVICETIMEOUT)
-                           Device = d; // use the actual device as a last resort
+                           // Device = d; // use the actual device as a last resort
+                           if( d->GetMaxBadPriority(Timer->Channel()) <= 0) Device = d;  // LNB Sharing
+
                         }
                      // Switch the device to the transponder:
                      if (Device) {
                         if (!Device->IsTunedToTransponder(Timer->Channel())) {
                            if (Device == cDevice::ActualDevice() && !Device->IsPrimaryDevice())
                               cDevice::PrimaryDevice()->StopReplay(); // stop transfer mode
-                           dsyslog("switching device %d to channel %d", Device->DeviceNumber() + 1, Timer->Channel()->Number());
+                           dsyslog("VDR: switching device %d to channel %d", Device->DeviceNumber() + 1, Timer->Channel()->Number());
                            Device->SwitchChannel(Timer->Channel(), false);
                            DeviceUsed[Device->DeviceNumber()] = Now;
                            }

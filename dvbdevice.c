@@ -683,6 +683,14 @@ cDvbDevice::cDvbDevice(int Adapter, int Frontend)
   // The DVR device (will be opened and closed as needed):
 
   fd_dvr = -1;
+  
+//ML
+  lnbState = -1;
+  SetLnbNrFromSetup();
+  lnbSource = NULL;
+//ML-Ende
+  
+  
 
   // We only check the devices that must be present - the others will be checked before accessing them://XXX
 
@@ -934,6 +942,12 @@ bool cDvbDevice::ProvidesChannel(const cChannel *Channel, int Priority, bool *Ne
 {
   bool result = false;
   bool hasPriority = Priority < 0 || Priority > this->Priority();
+  // LNB Sharing
+  if(hasPriority && GetMaxBadPriority(Channel) >= Priority) hasPriority = false;
+  if (Setup.VerboseLNBlog) {
+   isyslog("LNB %d: ProvidesChannel %d on device %d. Priority is %d, hasPriority is %d", LnbNr(), Channel->Number(), this->DeviceNumber() + 1, Priority, hasPriority);
+  }
+  // LNB Sharing END
   bool needsDetachReceivers = false;
 
   if (ProvidesTransponder(Channel)) {
@@ -982,7 +996,27 @@ bool cDvbDevice::IsTunedToTransponder(const cChannel *Channel)
 bool cDvbDevice::SetChannelDevice(const cChannel *Channel, bool LiveView)
 {
   dvbTuner->Set(Channel);
-  return true;
+  // LNB Sharing
+  cDvbTransponderParameters dtp(Channel->Parameters());
+ 
+  if (Channel->Frequency() >= Setup.LnbSLOF) {
+     lnbState = 1;
+  } else {
+     lnbState = 0;
+  }
+  if (dtp.Polarization() == 'v' || dtp.Polarization() == 'V') lnbState += 2;
+  lnbSource = (int*) Diseqcs.Get(CardIndex() + 1, Channel->Source(), Channel->Frequency(), dtp.Polarization());
+
+  cDevice *tmpDevice;
+  if(tmpDevice = GetBadDevice(Channel)){
+    tmpDevice->DetachAllReceivers();
+    if (tmpDevice->CamSlot() && !tmpDevice->CamSlot()->IsDecrypting())
+    	tmpDevice->CamSlot()->Assign(NULL);
+
+	tmpDevice->SwitchChannel(Channel, false);
+  }
+  	// LNB Sharing End
+ return true;
 }
 
 bool cDvbDevice::HasLock(int TimeoutMs)
@@ -1022,6 +1056,47 @@ bool cDvbDevice::GetTSPacket(uchar *&Data)
      }
   return false;
 }
+
+// LNB - Sharing
+void cDvbDevice::SetLnbNrFromSetup(void)
+{
+  lnbNr = Setup.CardUsesLnbNr[CardIndex()];
+  isyslog("LNB-sharing: patch version %s", LNB_SHARING_VERSION);
+  isyslog("LNB-sharing: setting device %d to use LNB %d", CardIndex() + 1, lnbNr);
+}
+
+bool cDvbDevice::IsShareLnb(const cDevice *Device)
+{ 
+  return this != Device && LnbNr() == Device->LnbNr();
+};
+
+
+bool cDvbDevice::IsLnbConflict(const cChannel *Channel)
+{
+  if(!cSource::IsSat(Channel->Source())) return false;  // no conflict if the new channel is not on sat
+  if(!ProvidesSource(cSource::stSat)) return false;     // no conflict if this device is not on sat
+//if(MaySwitchTransponder()) return false;              // no conflict if this transponder may be switched
+  cDvbTransponderParameters dtp(Channel->Parameters());
+  if (Setup.DiSEqC) {
+    cDiseqc *diseqc;
+    diseqc = Diseqcs.Get(CardIndex() + 1, Channel->Source(), Channel->Frequency(), dtp.Polarization() );
+    if (LnbSource() != (int*) diseqc) return true;
+    return false;
+  } else
+  {
+    char requiredState;
+    if (Channel->Frequency() >= Setup.LnbSLOF) {
+      requiredState = 1 ;
+    } else {
+      requiredState = 0;
+    }
+    if (dtp.Polarization() == 'v' || dtp.Polarization() == 'V') requiredState += 2;
+    if(lnbState != requiredState) return true;
+    return false;
+  }
+}
+// LNB - Sharing Ende
+
 
 // --- cDvbDeviceProbe -------------------------------------------------------
 

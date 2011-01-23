@@ -1,0 +1,31 @@
+configurableLNBshare Revision History
+
+Version for VDR 1.4.3 
+
+- configurableLNBshare-VDR_1.4.3.patch from Matthias Lötzke (http://lötzke.de/vdr.html)
+
+2010-04-10: Version for VDR 1.7.14
+
+- Created HISTORY.LNBshare
+- Created README.LNBshare
+- Fixed possible buffer overflow in cMenuSetupLNB::Setup(void)
+- Ignore all non-DVB-S devices when checking for possible conflicts.
+- Use the 'actual' device instead of the 'primary' device as device that is used as reciever for live viewing. This adds support for 'other' output devices than a FF card like xine. Based on a patch from CR7 at vdr-portal.de
+- Adept to  VDR 1.7.14. Support the new diseqc feature introduced with VDR 1.7.13: 'Added device definitions to the diseqc.conf file format, so that certain satellite positions can be limited to a given list of devices'.
+  
+2010-11-13:
+
+- Fix: Devices sharing same LNB don't switch channel on main channel switch (thanks to hivdr @ vdr-portal.de for reporting the bug and spockele @ vdr-portal.de and hopsi @ vdr-portal.de for testing the correction)
+- Fix: In LOG, device numbering is now as in VDR: Starting from 1, ...
+- Fix: Encoding of german umlaut in "DVB-Empfänger %d nutzt LNB Nr"
+
+2010-11-28:
+
+- Fix: Device numbering in message 'LNB or DiSEq conflict with device ...'.
+- Fix: Numbering of LNBs not using SAT
+
+2010-12-25: Version 0.1.0 for VDR version 1.7.16
+
+- Rename the patch to include patch version number (vdr-lnb-sharing-0.1.0-1.7.16.patch)
+- Write patch version number to log file (if logging is switched on).
+- Adept to  VDR 1.7.16

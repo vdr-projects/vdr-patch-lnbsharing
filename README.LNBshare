@@ -1,0 +1,22 @@
+Settings (OSD)
+In VDR, if you select Settings -> LNB and have two or more devices that can recieve SAT channels, you can set the 'LNB Nr.' for each of these devices. Note:
+- All devices with an identical 'LNB Nr.' share the same LNB
+- The patch assumes that a device has always the same number. If you have more than two devices, you must make sure to load the drivers in a given order to make sure that each of the listed devices belongs always to the same card. If during setup, for example, your first DVB-S card is device 2 and your second DVB-S card is device 4 (device 1 and 3 are, for example, DVB-T cards) you must make sure that after reboot these stay the same: your first DVB-S card is device 2 and your second DVB-S card is device 4.
+
+DISEQC Support:
+Diseqc is supported, including the feature added in VDR 1.7.13: Added device definitions to the diseqc.conf file format, so that certain satellite positions can be limited to a given list of devices
+Note: Please ensure in diseqc.conf that all devices sharing one LNB have exactly the same satellite positions. The system will not check this, but, otherwise, the patch will not work correctly. This is not a restriction: obviously, if two devices share the same LNB, they can also receive the same satellite positions.
+
+Primary limit (Setup.PrimaryLimit):
+See MANUAL for a description: 'This is mainly useful for recordings that should take place only when there is nothing else to do, but should never keep the user from viewing stuff on the primary interface'
+In unpatched VDR, this seems to work with FF cards. For other output devices (for example vdr-xine), it probably won't work.
+Not fully supported by LNB sharing: If the primary device shares an LNB with device2, device2 might start a recording with priority < Setup.PrimaryLimit and force the primary device to an other channel.
+
+TODO / Missing:
+Intelligent assigning of timers to devices.
+Example: If you have 3 DVB-S cards and 2 of them share the same LNB, you can, in principle, record 2 channels in 'high' band and one in 'low' band. But, with this patch, this is not guaranteed. The DVB-S card with an own LNB might record one of the channels in high band. So, one of the other channels will not be recorded.
+Note:
+- Such intelligent scheduling is generally missing in VDR and would be also useful for 'mixed' systems with DVB-S and DVB-T cards as well as systems in which not all DVB-S cards can receive the same satellites.
+- I don't plan to implement this feature. Any volunteers?
+
+Contact: You find me at  http://www.vdr-portal.de , user MarkusE . Please create a new thread in Developer->Patches for any questions or bug reports
