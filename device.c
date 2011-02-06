@@ -151,6 +151,20 @@ void cDevice::SetLnbNr(void)
     device[i]->SetLnbNrFromSetup();
   }
 }
+
+
+bool cDevice::IsLnbSendSignals(void)
+{
+  for (int i = 0; i < cardIndex; i++) {
+	if (device[i]->IsShareLnb(this) ) {
+	  isyslog("Device %d: will not send any signal (like 22kHz) to LNB as device %d will do this", cardIndex+1, i+1);
+	  return false;
+	}
+  }
+  isyslog("Device %d: will send signals (like 22kHz) to LNB nr. = %d ", cardIndex+1, LnbNr() );
+  return true;
+}
+
 //ML-Ende
 
 int cDevice::NextCardIndex(int n)

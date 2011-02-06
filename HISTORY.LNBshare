@@ -29,3 +29,9 @@ Version for VDR 1.4.3
 - Rename the patch to include patch version number (vdr-lnb-sharing-0.1.0-1.7.16.patch)
 - Write patch version number to log file (if logging is switched on).
 - Adept to  VDR 1.7.16
+
+
+2010-02-06 Version 0.1.1 for VDR version 1.7.16
+- Fix: If several DVB devices share one LNB, only the first of these devises will send signals like 22kHz. See README.LNBshare for details
+- README.LNBshare: Include warning about 1.3 FF cards with buggy Loop-Through that might result in destruction of LNBP-Chips if the Loop-Through is used
+- Fix: Log file: Numbering of 'LNBs' not connected to a SAT DVB card

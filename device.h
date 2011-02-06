@@ -168,6 +168,10 @@ public:
          ///< Called after changes in setup
          ///< Read Setup.CardUsesLNBnr, write value to member variable of this class
          ///< Only implemented in dvbdevice, other devices don't use LNBs
+  bool IsLnbSendSignals(void);
+         ///< If several devices share the same LNB, only the first of these
+         ///< must send signals (like 22 kHz) to the LNB
+         ///< check, whepher this device must send these signals
   virtual int LnbNr(void) const { return ( cardIndex + 1 ) * -1; };
          ///< Number of LNB. This is -cardIndex for all non-DVB devices.
          ///< So, there will be no LNB conflicts for non-DVB devices.
