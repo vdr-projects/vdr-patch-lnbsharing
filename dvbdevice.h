@@ -133,7 +133,6 @@ private:
   //  cDiseqc *lnbSource;  // can not #include "diseqc.h". A workaround follows:
   int *lnbSource;  // [DiSEqC] DiSEqC-Source
   int lnbNr;      // Number of LNB used
-  bool lnbSendSignals; // false if this device must not send signals to the LNB (like 22 kHz, ...).
 
 public:
   int *LnbSource(void) { return lnbSource; };

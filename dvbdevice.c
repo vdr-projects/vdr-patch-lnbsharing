@@ -261,7 +261,7 @@ private:
   int adapter, frontend;
   int tuneTimeout;
   int lockTimeout;
-  bool lnbSendSignals;   // LNB Sharing
+  bool lnbSendSignals;   // LNB Sharing.  false if this device must not send signals to the LNB (like 22 kHz, ...).
   time_t lastTimeoutReport;
   fe_delivery_system frontendType;
   cChannel channel;
@@ -274,7 +274,7 @@ private:
   bool SetFrontend(void);
   virtual void Action(void);
 public:
-  cDvbTuner(int Device, int Fd_Frontend, int Adapter, int Frontend, fe_delivery_system FrontendType, bool LnbSendSignals);
+  cDvbTuner(int Device, int Fd_Frontend, int Adapter, int Frontend, fe_delivery_system FrontendType, cDvbDevice *Dvbdevice); // LNB Sharing
   virtual ~cDvbTuner();
   const cChannel *GetTransponder(void) const { return &channel; }
   bool IsTunedTo(const cChannel *Channel) const;
@@ -282,9 +282,13 @@ public:
   bool Locked(int TimeoutMs = 0);
   };
 
-cDvbTuner::cDvbTuner(int Device, int Fd_Frontend, int Adapter, int Frontend, fe_delivery_system FrontendType, bool LnbSendSignals)  // LNB Sharing
+cDvbTuner::cDvbTuner(int Device, int Fd_Frontend, int Adapter, int Frontend, fe_delivery_system FrontendType, cDvbDevice *Dvbdevice)  // LNB Sharing
 {
-  lnbSendSignals = LnbSendSignals;  // LNB Sharing
+// LNB Sharing
+  if(Dvbdevice) {
+	lnbSendSignals = Dvbdevice->IsLnbSendSignals();  
+  } else lnbSendSignals = true;
+// END LNB Sharing
   device = Device;
   fd_frontend = Fd_Frontend;
   adapter = Adapter;
@@ -730,10 +734,8 @@ cDvbDevice::cDvbDevice(int Adapter, int Frontend)
         lnbState = -1;
         SetLnbNrFromSetup();
         lnbSource = NULL;
+        dvbTuner = new cDvbTuner(CardIndex() + 1, fd_frontend, adapter, frontend, frontendType, this);
 //ML-Ende
-       
-        
-        dvbTuner = new cDvbTuner(CardIndex() + 1, fd_frontend, adapter, frontend, frontendType, lnbSendSignals);
         }
      }
   else
@@ -1069,7 +1071,6 @@ void cDvbDevice::SetLnbNrFromSetup(void)
 {
   lnbNr = Setup.CardUsesLnbNr[CardIndex()];
   isyslog("LNB-sharing: setting device %d to use LNB %d", CardIndex() + 1, lnbNr);
-  lnbSendSignals = IsLnbSendSignals();
 }
 
 bool cDvbDevice::IsShareLnb(const cDevice *Device)

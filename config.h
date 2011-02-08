@@ -293,7 +293,7 @@ public:
   int EmergencyExit;
 
 //ML
-  #define LNB_SHARING_VERSION "0.1.1"
+  #define LNB_SHARING_VERSION "0.1.2"
   int VerboseLNBlog;
   #define MAXDEVICES 16 // Since VDR 1.3.32 we can not #include "device.h" for MAXDEVICES anymore.
                         // With this workaround a warning will be shown during compilation if

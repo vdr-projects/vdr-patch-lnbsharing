@@ -35,3 +35,6 @@ Version for VDR 1.4.3
 - Fix: If several DVB devices share one LNB, only the first of these devises will send signals like 22kHz. See README.LNBshare for details
 - README.LNBshare: Include warning about 1.3 FF cards with buggy Loop-Through that might result in destruction of LNBP-Chips if the Loop-Through is used
 - Fix: Log file: Numbering of 'LNBs' not connected to a SAT DVB card
+
+2010-02-08 Version 0.1.2 for VDR version 1.7.16
+- Change: Make it easier to apply this patch together with the dynamite-Plugin patch. Note: this is mostly for maintainers of distributions and multi-patches. It will (must probably) not be possible for devices added with dynamite to share LNBs. Some concept work is required for this: How can VDR uniquely identify a device? How can a user identify such a device on OSD?
