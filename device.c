@@ -155,9 +155,9 @@ void cDevice::SetLnbNr(void)
 
 bool cDevice::IsLnbSendSignals(void)
 {
-  for (int i = 0; i < cardIndex; i++) {
+  for (int i = 0; device[i] != this && i < numDevices; i++) {
 	if (device[i]->IsShareLnb(this) ) {
-	  isyslog("Device %d: will not send any signal (like 22kHz) to LNB as device %d will do this", cardIndex+1, i+1);
+	  isyslog("Device %d: will not send any signal (like 22kHz) to LNB as device %d will do this", cardIndex+1, device[i]->cardIndex + 1);
 	  return false;
 	}
   }
@@ -731,13 +731,13 @@ cDevice *cDevice::GetBadDevice(const cChannel *Channel)
     if (this != device[i] && device[i]->IsShareLnb(this) &&  device[i]->IsLnbConflict(Channel) ) {
     	// there is a conflict between device[i] and 'this' if we tune this to Channel
       if (Setup.VerboseLNBlog) {
-        isyslog("LNB %d: Device check for channel %d on device %d. LNB or DiSEq conflict with device %d", LnbNr(), Channel->Number(), this->DeviceNumber() + 1, i + 1);
+        isyslog("LNB %d: Device check for channel %d on device %d. LNB or DiSEq conflict with device %d", LnbNr(), Channel->Number(), this->cardIndex + 1, device[i]->cardIndex + 1);
       }
       return device[i];
     }
   }
   if (Setup.VerboseLNBlog) { 
-    isyslog("LNB %d: Device check for channel %d on device %d. OK", LnbNr(), Channel->Number(), this->DeviceNumber() + 1);
+    isyslog("LNB %d: Device check for channel %d on device %d. OK", LnbNr(), Channel->Number(), this->cardIndex + 1);
   }
   return NULL;
 }
@@ -752,15 +752,15 @@ int cDevice::GetMaxBadPriority(const cChannel *Channel) const
     if (this != device[i] && device[i]->IsShareLnb(this) && device[i]->IsLnbConflict(Channel) ) {
     	// there is a conflict between device[i] and 'this' if we tune this to Channel
     	  if (Setup.VerboseLNBlog) {
-            isyslog("LNB %d: Conflict for device %d, priority of conflicting device: %d", LnbNr(), i + 1, device[i]->Priority());
+            isyslog("LNB %d: Conflict for device %d, priority of conflicting device: %d", LnbNr(), device[i]->cardIndex + 1, device[i]->Priority());
     	  }
       if (device[i]->Receiving() && device[i]->Priority() > maxBadPriority) maxBadPriority = device[i]->Priority();
-      if (i == ActualDevice()->CardIndex() && maxBadPriority < -1 ) maxBadPriority = -1;
+      if (device[i] == ActualDevice() && maxBadPriority < -1 ) maxBadPriority = -1;
     }
   }
 
   if (Setup.VerboseLNBlog) { 
-    isyslog("LNB %d: Request for channel %d on device %d. MaxBadPriority is %d", LnbNr(), Channel->Number(), this->DeviceNumber() + 1, maxBadPriority);
+    isyslog("LNB %d: Request for channel %d on device %d. MaxBadPriority is %d", LnbNr(), Channel->Number(), this->cardIndex + 1, maxBadPriority);
   }
   return maxBadPriority;
 }
