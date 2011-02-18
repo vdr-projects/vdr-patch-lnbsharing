@@ -286,6 +286,10 @@ cDevice *cDevice::GetDevice(const cChannel *Channel, int Priority, bool LiveView
       for (int i = 0; i < numDevices; i++) {
           if (device[i] == AvoidDevice)
              continue; // this device shall be temporarily avoided
+          // LNB - Sharing
+          if (AvoidDevice && device[i]->IsShareAvoidDevice(Channel, AvoidDevice) )
+            continue; // this device shall be temporarily avoided
+          // LNB - Sharing END
           if (Channel->Ca() && Channel->Ca() <= CA_DVB_MAX && Channel->Ca() != device[i]->CardIndex() + 1)
              continue; // a specific card was requested, but not this one
           if (NumUsableSlots && !CamSlots.Get(j)->Assign(device[i], true))
@@ -763,6 +767,20 @@ int cDevice::GetMaxBadPriority(const cChannel *Channel) const
     isyslog("LNB %d: Request for channel %d on device %d. MaxBadPriority is %d", LnbNr(), Channel->Number(), this->cardIndex + 1, maxBadPriority);
   }
   return maxBadPriority;
+}
+
+bool cDevice::IsShareAvoidDevice(const cChannel *Channel, const cDevice *AvoidDevice) const
+{                                
+  if(!cSource::IsSat(Channel->Source())) return false;  // no conflict if the new channel is not on sat
+  if(!ProvidesSource(cSource::stSat)) return false;     // no conflict if this device is not on sat
+
+  for (int i = 0; i < numDevices; i++) {
+    if (this != device[i] && device[i]->IsShareLnb(this) && device[i]->IsLnbConflict(Channel) ) {
+    	// there is a conflict between device[i] and 'this' if we tune this to Channel
+    	if(device[i] == AvoidDevice) return true;
+    }
+  }
+  return false;
 }
 // ML Ende
 

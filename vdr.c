@@ -877,22 +877,21 @@ int main(int argc, char *argv[])
                                break;
                                }
                             bool timeout = Now - DeviceUsed[d->DeviceNumber()] > TIMERDEVICETIMEOUT; // only check other devices if they have been left alone for a while
-                            if (d->MaySwitchTransponder()) {
+                            if (d->MaySwitchTransponder() && d->GetMaxBadPriority(Timer->Channel()) == -2 ) { // LNB Sharing
                                DeviceAvailable = true; // avoids using the actual device below
                                if (timeout)
-                                  // Device = d; // only check other devices if they have been left alone for a while
-                                  if( d->GetMaxBadPriority(Timer->Channel()) <= 0) Device = d;  // LNB Sharing
+                                  Device = d; // only check other devices if they have been left alone for a while
                                }
                             else if (timeout && !Device && InVpsMargin && !d->Receiving() && d->ProvidesTransponderExclusively(Timer->Channel()))
                                // Device = d; // use this one only if no other with less impact can be found
-                               if( d->GetMaxBadPriority(Timer->Channel()) <= 0) Device = d;  // LNB Sharing
+                               if( d->GetMaxBadPriority(Timer->Channel()) <= -1) Device = d;  // LNB Sharing
                          }
                          }
                      if (!Device && InVpsMargin && !DeviceAvailable) {
                         cDevice *d = cDevice::ActualDevice();
                         if (!d->Receiving() && d->ProvidesTransponder(Timer->Channel()) && Now - DeviceUsed[d->DeviceNumber()] > TIMERDEVICETIMEOUT)
                            // Device = d; // use the actual device as a last resort
-                           if( d->GetMaxBadPriority(Timer->Channel()) <= 0) Device = d;  // LNB Sharing
+                           if( d->GetMaxBadPriority(Timer->Channel()) <= -1) Device = d;  // LNB Sharing
 
                         }
                      // Switch the device to the transponder:

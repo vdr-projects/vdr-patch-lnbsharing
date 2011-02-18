@@ -194,6 +194,8 @@ public:
          ///< (device recieving live view) would be affected by switching to the requested channel.
          ///< Returns -2 if there are no such devices and the actual device
          ///< would not be affected by switching to the requested channel.
+  bool IsShareAvoidDevice(const cChannel *Channel, const cDevice *AvoidDevice) const;
+         ///< Returns true if switching this device to Channel will result in a switch of AvoidDevice
 //ML-Ende
 
 
